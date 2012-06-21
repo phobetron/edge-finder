@@ -1,4 +1,4 @@
-#1 Edge Finder
+# Edge Finder
 
 This is a simple jQuery module that takes a given image and scans it for edges, returning an array of pixels. It currently works best with flat monochrome graphics.
 
