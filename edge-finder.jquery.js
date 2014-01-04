@@ -1,9 +1,8 @@
 (function($) {
-  $.fn.edgeFinder = function(options) {
+  $.fn.EdgeFinder = function(side, options) {
     var edgeFinder = [];
 
     var settings = {
-      side: "entire",
       rgba: [0,0,0,0],
       exclude: []
     }
@@ -48,16 +47,18 @@
 
     var vertical = function(direction, image) {
       var data = image.data;
-      var edges = new Array();
+      var edges = [];
       var o_rgba = settings.rgba.slice(0);
 
       for (var x = 0; x < image.width; x++) {
         for (var y = 0; y < image.height; y++) {
-          var p = (x+y*image.width)*4;
-          var _rgba = [data[p], data[p+1], data[p+2], data[p+3]];
+          var pt = (x+y*image.width)*4;
+          var _rgba = [data[pt], data[pt+1], data[pt+2], data[pt+3]];
 
-          var p = {y: y, x: x };
-          if (!exclude(p) && edger(o_rgba, _rgba, direction)) { edges.push(p); }
+          var p = { y: y, x: x };
+          if (!exclude(p) && edger(o_rgba, _rgba, direction)) {
+            edges.push(p);
+          }
 
           o_rgba = _rgba;
         }
@@ -74,8 +75,10 @@
       for (var i = 0; i < image.data.length; i+=4) {
         var _rgba = [data[i], data[i+1], data[i+2], data[i+3]];
 
-        var p = {y: Math.round((i/4)/image.width), x: (i/4)%image.width};
-        if (!exclude(p) && edger(o_rgba, _rgba, direction)) { edges.push(p); }
+        var p = { y: Math.round((i/4)/image.width), x: (i/4)%image.width };
+        if (!exclude(p) && edger(o_rgba, _rgba, direction)) {
+          edges.push(p);
+        }
 
         o_rgba = _rgba;
       }
@@ -96,21 +99,23 @@
     }
 
     this.each(function(i) {
-      var image = {
-        width: this.width,
-        height: this.height
-      }
+      if (methods[side+"Edge"]) {
+        var image = {
+          width: this.width,
+          height: this.height
+        }
 
-      var canvas = document.createElement("canvas");
-          canvas.setAttribute("width", image.width);
-          canvas.setAttribute("height", image.height);
-      var c = canvas.getContext("2d");
-          c.drawImage(this, 0, 0, image.width, image.height);
-      var imageData = c.getImageData(0, 0, image.width, image.height);
-      image["data"] = imageData.data;
+        var canvas = document.createElement("canvas");
+            canvas.setAttribute("width", image.width);
+            canvas.setAttribute("height", image.height);
 
-      if (methods[settings.side+"Edge"]) {
-        var edges = methods[settings.side+"Edge"].apply(this, [image]);
+        var c = canvas.getContext("2d");
+            c.drawImage(this, 0, 0, image.width, image.height);
+
+        var imageData = c.getImageData(0, 0, image.width, image.height);
+        image["data"] = imageData.data;
+
+        var edges = methods[side+"Edge"].apply(this, [image]);
         edgeFinder.push(edges);
       }
       else { $.error("That is not a valid edge."); }
